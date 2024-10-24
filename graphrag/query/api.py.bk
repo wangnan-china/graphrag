@@ -85,13 +85,9 @@ async def global_search(
         entities=_entities,
         response_type=response_type,
     )
-    #print(f"+++++++++++global search input query: {query}")
     result: SearchResult = await search_engine.asearch(query=query)
     response = result.response
-    #print(f"+++++++++search_engine response: {response}")
     context_data = _reformat_context_data(result.context_data)  # type: ignore
-
-    #print(f"+++++++++++global search context_data: {context_data}")
     return response, context_data
 
 

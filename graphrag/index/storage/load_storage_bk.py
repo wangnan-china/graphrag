@@ -33,10 +33,7 @@ def load_storage(config: PipelineStorageConfig):
                 config.base_dir,
             )
         case StorageType.file:
-            print(f"the storage is file storage: storage config base_dir: {PipelineFileStorageConfig}")
             config = cast(PipelineFileStorageConfig, config)
-            print(f"** file config base_dir: {config.base_dir}")
-           
             return create_file_storage(config.base_dir)
         case _:
             msg = f"Unknown storage type: {config.type}"

@@ -83,8 +83,6 @@ def _get_llm(
     cache: PipelineCache,
 ) -> EmbeddingLLM:
     llm_type = config.lookup("type", "Unknown")
-    
-    print(f"++++++++ _get_llm: {llm_type} +++++")
     return load_llm_embeddings(
         "text_embedding",
         llm_type,

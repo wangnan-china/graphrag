@@ -89,7 +89,7 @@ def get_completion_llm_args(
     }
 
 def clean_up_json(json_str: str) -> str:
-    json_str = json_str[json_str.find('{'):]
+    json_str = json_str[json_str.find('{'):json_str.rfind('}')+1]
     """Clean up json string."""
     json_str = (
         json_str.strip("").replace("\\n", "")
@@ -103,7 +103,7 @@ def clean_up_json(json_str: str) -> str:
         .replace("}}", "}")
         .strip()
     )
-
+    
     # Remove JSON Markdown Frame
     if json_str.startswith("```json"):
         json_str = json_str[len("```json"):]

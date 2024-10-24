@@ -59,6 +59,7 @@ class ChatOpenAI(BaseLLM, OpenAILLMImpl):
         )
         self.model = model
         self.retry_error_types = retry_error_types
+        
 
     def generate(
         self,

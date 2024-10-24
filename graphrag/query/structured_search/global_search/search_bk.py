@@ -98,7 +98,7 @@ class GlobalSearch(BaseSearch):
         else:
             # remove response_format key if json_mode is False
             self.map_llm_params.pop("response_format", None)
-        print(f"*****Global search initialized.  map_llm_params: {self.map_llm_params.items}")
+
         self.semaphore = asyncio.Semaphore(concurrent_coroutines)
 
     async def astream_search(
@@ -146,17 +146,14 @@ class GlobalSearch(BaseSearch):
         - Step 1: Run parallel LLM calls on communities' short summaries to generate answer for each batch
         - Step 2: Combine the answers from step 2 to generate the final answer
         """
-        print(f"++++++++global asearch query: {query}, conversation_history: {conversation_history}")
-      
         # Step 1: Generate answers for each batch of community short summaries
         start_time = time.time()
         context_chunks, context_records = self.context_builder.build_context(
             conversation_history=conversation_history, **self.context_builder_params
         )
-       
+
         if self.callbacks:
             for callback in self.callbacks:
-                print(f"-------global search callback.: {callback.__class__}")
                 callback.on_map_response_start(context_chunks)  # type: ignore
         map_responses = await asyncio.gather(*[
             self._map_response_single_batch(
@@ -209,20 +206,15 @@ class GlobalSearch(BaseSearch):
         search_prompt = ""
         try:
             search_prompt = self.map_system_prompt.format(context_data=context_data)
-            #search_messages = [
-            #    {"role": "system", "content": search_prompt},
-            #    {"role": "user", "content": query},
-            #]
-            search_messages = [ {"role": "user", "content": search_prompt + "\n\n### USER QUESTION ### \n\n" + query} ]
-
-            print(f"+++++in _map_response_single_batch, search message: {search_messages} ")
+            search_messages = [
+                {"role": "system", "content": search_prompt},
+                {"role": "user", "content": query},
+            ]
             async with self.semaphore:
                 search_response = await self.llm.agenerate(
                     messages=search_messages, streaming=False, **llm_kwargs
                 )
-                log.warning("Map response: %s", search_response)
-                index_of_json_starting_point=search_response.find("{")
-                search_response = search_response[index_of_json_starting_point:]
+                log.info("Map response: %s", search_response)
             try:
                 # parse search response json
                 processed_response = self.parse_search_response(search_response)
@@ -270,9 +262,9 @@ class GlobalSearch(BaseSearch):
         list[dict[str, Any]]
             A list of key points, each key point is a dictionary with "answer" and "score" keys
         """
-        search_response, _j = try_parse_json_object(search_response)
-        if _j == {}:
-            return [{"answer": "", "score": 0}]
+        #search_response, _j = try_parse_json_object(search_response)
+        #if _j == {}:
+        #    return [{"answer": "", "score": 0}]
 
         parsed_elements = json.loads(search_response).get("points")
         if not parsed_elements or not isinstance(parsed_elements, list):
